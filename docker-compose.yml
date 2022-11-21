@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  #database section
+  DotnetCoreTraining:
+    image: mysql:8.0.29
+
+  #infrastructure section
+  portainer:
+    image: portainer/portainer-ce   
+
+#network section
+networks:
+  default:
+    name: netcore_training
+    driver: bridge
+
+#volumes section
+volumes:
+  mysql_data:
+    name: mysql_data
+  portainer_data:
+    name: portainer_data
