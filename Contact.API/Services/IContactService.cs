@@ -6,7 +6,7 @@ namespace Contact.API.Services
     {
         Task<IEnumerable<CatalogContact>> GetContactsAsync(bool trackChanges = false);
         Task<CatalogContact> GetContactAsync(int id);
-        Task<int> CreateContactAsync(CatalogContact product);
+        Task<bool> CreateContactAsync(CatalogContact product);
         Task<bool> UpdateContactAsync(int id, CatalogContact product);
     }
 }

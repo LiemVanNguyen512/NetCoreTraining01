@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Contact.API.DTOs
 {
-    public class CreateOrUpdateContactDto
+    public class CreateContactDto
     {
         [Required]
         [Column(TypeName = "nvarchar(255)")]

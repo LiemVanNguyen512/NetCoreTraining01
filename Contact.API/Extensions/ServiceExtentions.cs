@@ -1,4 +1,5 @@
 ﻿using Contact.API.Persistence;
+using Contact.API.Services;
 using Microsoft.EntityFrameworkCore;
 using MySqlConnector;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
@@ -14,6 +15,7 @@ namespace Contact.API.Extensions
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
             services.ConfigureProductDbContext(configuration);
+            services.AddInfrastructureServices();
             services.AddAutoMapper(cfg => cfg.AddProfile(new MappingProfile()));
             return services;
         }
@@ -31,6 +33,10 @@ namespace Contact.API.Extensions
 
             return services;
         }
-        
+        private static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
+        {
+            return services.AddTransient<IContactService, ContactService>();
+        }
+
     }
 }

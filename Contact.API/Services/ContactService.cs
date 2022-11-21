@@ -13,16 +13,41 @@ namespace Contact.API.Services
             _context = context;
         }
 
-        public async Task<int> CreateContactAsync(CatalogContact contact)
+        public async Task<bool> CreateContactAsync(CatalogContact contact)
         {
-            _context.Contacts.Add(contact);
-            await _context.SaveChangesAsync();
-            return contact.Id;
+            try
+            {
+                var checkEmail = await CheckEmailExist(contact.Email);
+                if(checkEmail != null)
+                {
+                    return false;
+                }
+                _context.Contacts.Add(contact);
+                await _context.SaveChangesAsync();
+            }
+            catch
+            {
+                return false;
+            }          
+            return true;
         }
 
         public async Task<CatalogContact> GetContactAsync(int id)
         {
             var contact = await _context.Contacts.FindAsync(id);
+            return contact;
+        }
+        private async Task<CatalogContact> CheckEmailExist(string email, string oldEmail = "")
+        {
+            var contact = new CatalogContact();
+            if (!string.IsNullOrEmpty(oldEmail))
+            {
+                contact = await _context.Contacts.Where(x => x.Email != oldEmail && x.Email == email).FirstOrDefaultAsync();
+            }
+            else
+            {
+                contact = await _context.Contacts.FirstOrDefaultAsync(x => x.Email == email);
+            }
             return contact;
         }
 
@@ -35,17 +60,29 @@ namespace Contact.API.Services
 
         public async Task<bool> UpdateContactAsync(int id, CatalogContact contact)
         {
-            var contactUpdate = await GetContactAsync(id);
-            if(contactUpdate == null)
+            try
+            {
+                var contactUpdate = await GetContactAsync(id);
+                if (contactUpdate == null)
+                {
+                    return false;
+                }
+                var checkEmail = await CheckEmailExist(contact.Email, contactUpdate.Email);
+                if (checkEmail != null)
+                {
+                    return false;
+                }
+                contactUpdate.FirstName = contact.FirstName;
+                contactUpdate.LastName = contact.LastName;
+                contactUpdate.Email = contact.Email;
+                contactUpdate.Phone = contact.Phone;
+                _context.Contacts.Update(contactUpdate);
+                await _context.SaveChangesAsync();
+            }
+            catch
             {
                 return false;
-            }
-            contactUpdate.FirstName = contact.FirstName;
-            contactUpdate.LastName = contact.LastName;
-            contactUpdate.Email = contact.Email;
-            contactUpdate.Phone = contact.Phone;
-            _context.Contacts.Update(contactUpdate);
-            await _context.SaveChangesAsync();
+            }         
             return true;
         }
     }
