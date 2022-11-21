@@ -19,5 +19,5 @@ docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d --remo
 + Get list (HttpGet): http://localhost:5001/api/contacts
 + Get by Id (HttpGet): http://localhost:5001/api/contacts/{id}
 + Create (HttpPost): http://localhost:5001/api/contacts
-+ Update (HttpPut): http://localhost:5001/api/contacts/{id}
++ Update (HttpPut): http://localhost:5001/api/contacts
 
