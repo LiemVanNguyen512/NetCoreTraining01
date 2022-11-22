@@ -2,13 +2,18 @@ version: '3.8'
 
 services:
   #database section
-  DotnetCoreTraining:
+  dotnetcoretraining:
     image: mysql:8.0.29
 
   #infrastructure section
   portainer:
     image: portainer/portainer-ce   
-
+  #microservices api section
+  contact.api:
+    image: ${DOCKER_REGISTRY-}contact-api:${PLATFORM:-linux}-${TAG:-latest}
+    build:
+        context: .
+        dockerfile: Contact.API/Dockerfile
 #network section
 networks:
   default:

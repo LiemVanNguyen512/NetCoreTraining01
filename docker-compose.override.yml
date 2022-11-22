@@ -4,8 +4,8 @@ services:
   #database section 
         
   #DotnetCoreTraining: mysql
-  DotnetCoreTraining:
-    container_name: DotnetCoreTraining
+  dotnetcoretraining:
+    container_name: dotnetcoretraining
     environment:
       MYSQL_ROOT_PASSWORD: "Passw0rd!"
     restart: always
@@ -14,8 +14,7 @@ services:
     ports:
       - "3306:3306"
   
-  #infrastructure section
-    
+  #infrastructure section 
   portainer:
     container_name: portainer
     restart: always
@@ -25,3 +24,15 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
+  #microservices api section
+  contact.api:
+    container_name: contact.api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - "ConnectionStrings:DefaultConnectionString=Server=dotnetcoretraining;Port=3306;Database=DotnetCoreTraining;Uid=root;Pwd=Passw0rd!"
+    depends_on: 
+      - dotnetcoretraining
+    ports:
+      - "6001:80"
+    restart: always
