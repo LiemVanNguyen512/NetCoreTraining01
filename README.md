@@ -13,11 +13,19 @@ Go to folder contain file `docker-compose`
 ```Powershell
 docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d --remove-orphans
 ```
+2. Build project Contact.API in Docker
+```Powershell
+docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d --remove-orphans --build
+```
+3. Stop docker-compose
+```Powershell
+docker-compose down
+```
 
 ## Application URLs - LOCAL Environment (Docker Container):
 - Contact API:
-+ Get list (HttpGet): http://localhost:5001/api/contacts
-+ Get by Id (HttpGet): http://localhost:5001/api/contacts/{id}
-+ Create (HttpPost): http://localhost:5001/api/contacts
-+ Update (HttpPut): http://localhost:5001/api/contacts
++ Get list Contacts (HttpGet): http://localhost:6001/api/contacts
++ Get Contact by Id (HttpGet): http://localhost:6001/api/contacts/{id}
++ Create Contact (HttpPost): http://localhost:6001/api/contacts
++ Update Contact (HttpPut): http://localhost:6001/api/contacts
 
