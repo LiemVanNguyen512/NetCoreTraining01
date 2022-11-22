@@ -21,7 +21,24 @@ docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d --remo
 ```Powershell
 docker-compose down
 ```
+Using docker run (Go to folder outside Contact.API)
 
+1. docker build -f PROJECT_DIRECTORY/Dockerfile -t IMAGE_NAME .
+```Powershell
+docker build -f Contact.API/Dockerfile -t netcoretraining .
+```
+
+2. docker run -d -p 8888:80 --name CONTAINER_NAME IMAGE_NAME
+```Powershell
+docker run -d --name myapp -p 8888:80 --network example-app netcoretraining
+```
+3. Stop container myapp
+```Powershell
+docker stop myapp
+docker rm myapp
+```
+docker network create example-app
+docker run --name dotnetcoretraining -d -p 3306:3306 -e MYSQL_ROOT_PASSWORD=Passw0rd! -v mysql:/var/lib/mysql --network example-app mysql:8.0.29
 ## Application URLs - LOCAL Environment (Docker Container):
 - Contact API:
 + Get list Contacts (HttpGet): http://localhost:6001/api/contacts
