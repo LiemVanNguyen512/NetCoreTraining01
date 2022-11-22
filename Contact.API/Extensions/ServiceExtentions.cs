@@ -1,8 +1,13 @@
 ﻿using Contact.API.Persistence;
 using Contact.API.Services;
+using Contact.API.Services.Interfaces;
+using Infrastructure.Repositories.Interfaces;
+using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using MySqlConnector;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
+using Contact.API.Repositories.Interfaces;
+using Contact.API.Repositories;
 
 namespace Contact.API.Extensions
 {
@@ -35,7 +40,10 @@ namespace Contact.API.Extensions
         }
         private static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
         {
-            return services.AddTransient<IContactService, ContactService>();
+            return services.AddScoped(typeof(IRepositoryBase<,,>), typeof(RepositoryBase<,,>))
+                            .AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>))
+                            .AddScoped<IContactRepository, ContactRepository>()
+                            .AddTransient<IContactService, ContactService>();
         }
 
     }

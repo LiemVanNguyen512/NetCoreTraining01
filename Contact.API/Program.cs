@@ -1,6 +1,7 @@
 using Common.Logging;
 using Contact.API.Extensions;
 using Contact.API.Persistence;
+using Infrastructure.Extensions;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 
@@ -18,7 +19,7 @@ app.UseSwagger();
 app.UseSwaggerUI();
 app.UseRouting();
 //app.UseHttpsRedirection();
-
+app.UseMiddleware<ExceptionHandler>();
 //app.UseAuthorization();
 
 app.UseEndpoints(endpoints =>

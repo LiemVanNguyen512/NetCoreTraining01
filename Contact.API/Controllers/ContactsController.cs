@@ -2,7 +2,8 @@
 using Contact.API.DTOs;
 using Contact.API.Entities;
 using Contact.API.Persistence;
-using Contact.API.Services;
+using Contact.API.Services.Interfaces;
+using Infrastructure.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
@@ -11,15 +12,16 @@ namespace Contact.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [TypeFilter(typeof(CustomResponseFilter))]
     public class ContactsController : ControllerBase
     {
         private readonly IContactService _contactService;
-        private readonly IMapper _mapper;
+        private readonly ILogger<ContactsController> _logger;
 
-        public ContactsController(IContactService contactService, IMapper mapper)
+        public ContactsController(IContactService contactService, ILogger<ContactsController> logger)
         {
             _contactService = contactService;
-            _mapper = mapper;
+            _logger = logger;
         }
 
         [HttpGet("{id}")]
@@ -30,41 +32,25 @@ namespace Contact.API.Controllers
             {
                 return NotFound();
             }
-            var contactDto = _mapper.Map<ContactDto>(contact);
-            return Ok(contactDto);
+            return Ok(contact);
         }
         [HttpGet]
-        public async Task<IActionResult> GetListContact()
+        public async Task<IActionResult> GetListContacts()
         {
-            var contacts = await _contactService.GetContactsAsync();
-            if (contacts == null)
-            {
-                return NoContent();
-            }
-            var contactDtos = _mapper.Map<IEnumerable<ContactDto>>(contacts);
-            return Ok(contactDtos);
+            var contacts = await _contactService.GetContactsAsync();           
+            return Ok(contacts);
         }
         [HttpPost]
         public async Task<IActionResult> CreateContact([FromBody] CreateContactDto contactDto)
         {
-            var contact = _mapper.Map<CatalogContact>(contactDto);
-            var result = await _contactService.CreateContactAsync(contact);
-            if(!result)
-            {
-                return BadRequest();
-            }
-            return Ok(contactDto);
+            var result = await _contactService.CreateContactAsync(contactDto);           
+            return Ok(result);
         }
         [HttpPut]
         public async Task<IActionResult> UpdateContact([Required] int id, [FromBody] UpdateContactDto contactDto)
         {
-            var contact = _mapper.Map<CatalogContact>(contactDto);
-            var result = await _contactService.UpdateContactAsync(id, contact);
-            if (!result)
-            {
-                return BadRequest();
-            }
-            return Ok(contactDto);
+            var result = await _contactService.UpdateContactAsync(id, contactDto);           
+            return Ok(result);
         }
     }
 }

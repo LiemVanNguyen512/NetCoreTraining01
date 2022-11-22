@@ -11,7 +11,7 @@ namespace Contact.API
         {
             CreateMap<CatalogContact, ContactDto>().ReverseMap();
             CreateMap<CreateContactDto, CatalogContact>().ReverseMap();
-            CreateMap<UpdateContactDto, CatalogContact>().ReverseMap().IgnoreAllNonExisting();
+            CreateMap<UpdateContactDto, CatalogContact>().IgnoreAllNonExisting();
         }
     }
 }

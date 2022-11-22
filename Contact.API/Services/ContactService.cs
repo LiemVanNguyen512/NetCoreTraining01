@@ -1,89 +1,83 @@
-﻿using Contact.API.Entities;
+﻿using AutoMapper;
+using Contact.API.DTOs;
+using Contact.API.Entities;
 using Contact.API.Persistence;
+using Contact.API.Repositories.Interfaces;
+using Contact.API.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Contact.API.Services
 {
     public class ContactService : IContactService
     {
-        private readonly ContactContext _context;
+        private readonly IContactRepository _contactRepository;
+        private readonly IMapper _mapper;
+        private readonly ILogger<ContactService> _logger;
 
-        public ContactService(ContactContext context)
+        public ContactService(IContactRepository contactRepository, IMapper mapper, ILogger<ContactService> logger)
         {
-            _context = context;
+            _contactRepository = contactRepository;
+            _mapper = mapper;
+            _logger = logger;
         }
 
-        public async Task<bool> CreateContactAsync(CatalogContact contact)
+        public async Task<ContactDto> CreateContactAsync(CreateContactDto contactDto)
+        {
+            var contactByEmail = await _contactRepository.GetContactByEmailAsync(contactDto.Email);
+            if (contactByEmail != null)
+            {
+                _logger.LogWarning($"Cannot create contact: Email {contactByEmail.Email} is existed");
+                throw new Exception($"Cannot create contact: Email {contactByEmail.Email} is existed");
+            }
+            var contact = _mapper.Map<CatalogContact>(contactDto);
+            await _contactRepository.CreateContactAsync(contact);
+            _logger.LogInformation($"Create contact with email {contact.Email} successfully");
+            var result = _mapper.Map<ContactDto>(contact);
+            return result;
+        }
+
+        public async Task<ContactDto> GetContactAsync(int id)
+        {
+            var contact = await _contactRepository.GetContactAsync(id);
+            _logger.LogInformation($"Get contact by Id: {id} successfully");
+            var result = _mapper.Map<ContactDto>(contact);
+            return result;
+        }
+
+        public async Task<IEnumerable<ContactDto>> GetContactsAsync()
+        {
+            var contacts = await _contactRepository.GetContactsAsync();
+            _logger.LogInformation($"Get {contacts.Count()} contacts successfully");
+            var result = _mapper.Map<IEnumerable<ContactDto>>(contacts);
+            return result;
+        }
+
+        public async Task<ContactDto> UpdateContactAsync(int id, UpdateContactDto contactDto)
         {
             try
             {
-                var checkEmail = await CheckEmailExist(contact.Email);
-                if(checkEmail != null)
+                var contact = await _contactRepository.GetContactAsync(id);
+                if (contactDto.Email != contact.Email)
                 {
-                    return false;
+                    var contactByEmail = await _contactRepository.GetContactByEmailAsync(contactDto.Email);
+                    if (contactByEmail != null)
+                    {
+                        _logger.LogWarning($"Cannot update contact {id}: Email {contactByEmail.Email} is existed");
+                        throw new Exception($"Cannot update contact {id}: Email {contactByEmail.Email} is existed");
+                    }
                 }
-                _context.Contacts.Add(contact);
-                await _context.SaveChangesAsync();
+                var updateContact = _mapper.Map(contactDto, contact);
+                await _contactRepository.UpdateContactAsync(updateContact);
+                _logger.LogInformation($"Update contact with id {updateContact.Id} successfully");
+                var result = _mapper.Map<ContactDto>(contact);
+                return result;
             }
-            catch
+            catch(Exception ex)
             {
-                return false;
+                _logger.LogError($"Error: {ex.Message}");
+                throw new Exception($"Can not update Contact with Id {id}");
             }          
-            return true;
-        }
-
-        public async Task<CatalogContact> GetContactAsync(int id)
-        {
-            var contact = await _context.Contacts.FindAsync(id);
-            return contact;
-        }
-        private async Task<CatalogContact> CheckEmailExist(string email, string oldEmail = "")
-        {
-            var contact = new CatalogContact();
-            if (!string.IsNullOrEmpty(oldEmail))
-            {
-                contact = await _context.Contacts.Where(x => x.Email != oldEmail && x.Email == email).FirstOrDefaultAsync();
-            }
-            else
-            {
-                contact = await _context.Contacts.FirstOrDefaultAsync(x => x.Email == email);
-            }
-            return contact;
-        }
-
-        public async Task<IEnumerable<CatalogContact>> GetContactsAsync(bool trackChanges = false)
-        {
-            var contacts = (!trackChanges) ? await _context.Contacts.AsNoTracking().ToListAsync()
-                                            : await _context.Contacts.ToListAsync();
-            return contacts;
-        }
-
-        public async Task<bool> UpdateContactAsync(int id, CatalogContact contact)
-        {
-            try
-            {
-                var contactUpdate = await GetContactAsync(id);
-                if (contactUpdate == null)
-                {
-                    return false;
-                }
-                var checkEmail = await CheckEmailExist(contact.Email, contactUpdate.Email);
-                if (checkEmail != null)
-                {
-                    return false;
-                }
-                contactUpdate.FirstName = contact.FirstName;
-                contactUpdate.LastName = contact.LastName;
-                contactUpdate.Email = contact.Email;
-                contactUpdate.Phone = contact.Phone;
-                _context.Contacts.Update(contactUpdate);
-                await _context.SaveChangesAsync();
-            }
-            catch
-            {
-                return false;
-            }         
-            return true;
         }
     }
 }
