@@ -17,7 +17,7 @@ docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d --remo
 ```Powershell
 docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d --remove-orphans --build
 ```
-3. Stop docker-compose
+3. Clean up containers and networks created by docker-compose
 ```Powershell
 docker-compose down
 ```
