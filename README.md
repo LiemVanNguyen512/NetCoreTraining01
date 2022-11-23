@@ -30,7 +30,7 @@ docker build -f Contact.API/Dockerfile -t netcoretraining .
 
 2. docker run -d -p 8888:80 --name CONTAINER_NAME IMAGE_NAME
 ```Powershell
-docker run -d --name myapp -p 8888:80 --network example-app netcoretraining
+docker run -d --name myapp -p 8888:80 -e "ConnectionStrings:DefaultConnectionString=Server=dotnetcoretraining;Port=3306;Database=DotnetCoreTraining;Uid=root;Pwd=Passw0rd!" --network example-app netcoretraining
 ```
 3. Stop container myapp
 ```Powershell
