@@ -10,8 +10,9 @@ using Infrastructure.Domains;
 
 namespace Infrastructure.Repositories.Interfaces
 {
-    public interface IRepositoryQueryBase<T, in K>
+    public interface IRepositoryBase<T, K, TContext>
         where T : EntityBase<K>
+        where TContext : DbContext
     {
         IQueryable<T> FindAll(bool trackChanges = false);
         IQueryable<T> FindAll(bool trackChanges = false, params Expression<Func<T, object>>[] includeProperties);
@@ -21,17 +22,6 @@ namespace Infrastructure.Repositories.Interfaces
 
         Task<T?> GetByIdAsync(K id);
         Task<T?> GetByIdAsync(K id, params Expression<Func<T, object>>[] includeProperties);
-    }
-
-    public interface IRepositoryQueryBase<T, K, TContext> : IRepositoryQueryBase<T, K>
-        where T : EntityBase<K>
-        where TContext : DbContext
-    {
-    }
-
-    public interface IRepositoryBase<T, K> : IRepositoryQueryBase<T, K>
-        where T : EntityBase<K>
-    {
         void Create(T entity);
         Task<K> CreateAsync(T entity);
         void Update(T entity);
@@ -42,12 +32,5 @@ namespace Infrastructure.Repositories.Interfaces
         Task<IDbContextTransaction> BeginTransactionAsync();
         Task EndTransactionAsync();
         Task RollbackTransactionAsync();
-    }
-
-    public interface IRepositoryBase<T, K, TContext> : IRepositoryBase<T, K>
-        where T : EntityBase<K>
-        where TContext : DbContext
-    {
-
     }
 }
