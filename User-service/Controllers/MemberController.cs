@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Infrastructure.DTOs.UserDTOs;
 using User_service.Entities;
 using User_service.Persistence;
 using User_service.Services.Interfaces;
@@ -7,6 +6,7 @@ using Infrastructure.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
+using Shared.DTOs.UserDTOs;
 
 namespace User_service.Controllers
 {
@@ -27,18 +27,18 @@ namespace User_service.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUser([Required] int id)
         {
-            var user = await _userService.GetUserAsync(id);
-            if(user == null)
+            var result = await _userService.GetUserAsync(id);
+            if(result == null)
             {
                 return NotFound();
             }
-            return Ok(user);
+            return Ok(result);
         }
         [HttpGet]
         public async Task<IActionResult> GetListUsers()
         {
-            var users = await _userService.GetUsersAsync();           
-            return Ok(users);
+            var result = await _userService.GetUsersAsync();           
+            return Ok(result);
         }
         [HttpPost]
         public async Task<IActionResult> CreateUser([FromBody] CreateUserDto userDto)

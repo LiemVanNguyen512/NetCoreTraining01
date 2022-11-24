@@ -3,6 +3,7 @@ using Course_service.Persistence;
 using Course_service.Repositories.Interfaces;
 using Infrastructure.Repositories;
 using Infrastructure.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace Course_service.Repositories
 {
@@ -12,24 +13,12 @@ namespace Course_service.Repositories
         {
         }
 
-        public Task CreateCourseAsync(Course course)
-        {
-            throw new NotImplementedException();
-        }
+        public async Task CreateCourseAsync(Course course) => await CreateAsync(course);
 
-        public Task<Course> GetCourseAsync(int id)
-        {
-            throw new NotImplementedException();
-        }
+        public async Task<Course> GetCourseAsync(int id) => await GetByIdAsync(id);
 
-        public Task<IEnumerable<Course>> GetCoursesAsync()
-        {
-            throw new NotImplementedException();
-        }
+        public async Task<IEnumerable<Course>> GetCoursesAsync() => await FindAll().ToListAsync();
 
-        public Task UpdateCourseAsync(Course course)
-        {
-            throw new NotImplementedException();
-        }
+        public async Task UpdateCourseAsync(Course course) => await UpdateAsync(course);
     }
 }

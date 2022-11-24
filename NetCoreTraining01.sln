@@ -20,6 +20,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "User-service", "User-servic
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Course-service", "Course-service\Course-service.csproj", "{6C168A51-7C69-4120-963C-9A9B5567C05A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "Shared\Shared.csproj", "{7FC77802-2C30-4FD2-A479-D6203DE65466}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,6 +44,10 @@ Global
 		{6C168A51-7C69-4120-963C-9A9B5567C05A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6C168A51-7C69-4120-963C-9A9B5567C05A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6C168A51-7C69-4120-963C-9A9B5567C05A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7FC77802-2C30-4FD2-A479-D6203DE65466}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7FC77802-2C30-4FD2-A479-D6203DE65466}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7FC77802-2C30-4FD2-A479-D6203DE65466}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7FC77802-2C30-4FD2-A479-D6203DE65466}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -49,6 +55,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{7217D3D8-55CD-4492-865C-01BF12F2FA83} = {33D19C38-BEA8-40E3-9D1F-7BD3E2435AA6}
 		{5AFA1435-FD65-405F-8A44-2BC0D7DC3227} = {33D19C38-BEA8-40E3-9D1F-7BD3E2435AA6}
+		{7FC77802-2C30-4FD2-A479-D6203DE65466} = {33D19C38-BEA8-40E3-9D1F-7BD3E2435AA6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2E056655-DA96-4FDD-B4DD-9C9543196A5E}

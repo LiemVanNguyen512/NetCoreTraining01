@@ -6,8 +6,8 @@ namespace Course_service.Repositories.Interfaces
 {
     public interface IEnrollmentRepository : IRepositoryBase<Enrollment, int, CourseContext>
     {
-        Task<IEnumerable<Course>> GetEnrollmentsAsync();
-        Task CreateEnrollmentAsync(Course course);
-        Task UpdateEnrollmentAsync(Course course);
+        Task<IEnumerable<Enrollment>> GetEnrollmentsAsync();
+        Task CreateEnrollmentAsync(Enrollment enrollment);
+        Task UpdateEnrollmentAsync(Enrollment enrollment);
     }
 }

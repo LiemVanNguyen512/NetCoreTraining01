@@ -17,7 +17,6 @@ builder.Host.ConfigureAppConfiguration((context, config) =>
         .AddEnvironmentVariables();
 }).UseSerilog(Serilogger.Configure);
 builder.Services.AddInfrastructure(builder.Configuration);
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

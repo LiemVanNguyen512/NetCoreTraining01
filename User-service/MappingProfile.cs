@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using User_service.Entities;
 using Infrastructure.Extensions;
-using Infrastructure.DTOs.UserDTOs;
+using Shared.DTOs.UserDTOs;
 
 namespace User_service
 {

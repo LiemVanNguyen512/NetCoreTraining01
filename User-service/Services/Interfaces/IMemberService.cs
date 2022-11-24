@@ -1,4 +1,5 @@
-﻿using Infrastructure.DTOs.UserDTOs;
+﻿
+using Shared.DTOs.UserDTOs;
 
 namespace User_service.Services.Interfaces
 {

@@ -1,11 +1,11 @@
 ﻿using AutoMapper;
-using Infrastructure.DTOs.UserDTOs;
 using User_service.Entities;
 using User_service.Persistence;
 using User_service.Repositories.Interfaces;
 using User_service.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Shared.DTOs.UserDTOs;
 
 namespace User_service.Services
 {

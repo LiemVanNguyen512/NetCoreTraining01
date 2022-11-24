@@ -1,10 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
-namespace Infrastructure.DTOs.UserDTOs
+namespace Shared.DTOs.UserDTOs
 {
-    public class CreateUserDto
+    public class UpdateUserDto
     {
         [Required]
         [Column(TypeName = "nvarchar(255)")]
