@@ -46,7 +46,7 @@ docker run --name dotnetcoretraining -d -p 3306:3306 -e MYSQL_ROOT_PASSWORD=Pass
 + Create Contact (HttpPost): http://localhost:6002/api/member
 + Update Contact (HttpPut): http://localhost:6002/api/member
 
-###Course service:
+### Course service:
 + Get list courses (HttpGet): http://localhost:6003/api/courses
 + Get course by Id (HttpGet): http://localhost:6003/api/courses/{id}
 + Create course (HttpPost): http://localhost:6003/api/courses
