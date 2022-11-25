@@ -23,20 +23,20 @@ namespace Infrastructure.ApiClients
 
         public async Task<UserDto> GetMemberById(int id)
         {
-            var response = await GetAsync<BaseResponseModel>(SystemConstants.AppSettings.UserServiceAddress, $"/api/member/{id}");
+            var response = await GetAsync<BaseResponseModel>(SystemConstants.UserService, $"/api/member/{id}");
             var result = JsonConvert.DeserializeObject<UserDto>(response.XData.ToString());
             return result;
         }
 
         public async Task<IEnumerable<UserDto>> GetMembers()
         {
-            var response = await GetAsync<BaseResponseModel>(SystemConstants.AppSettings.UserServiceAddress, $"/api/member");
+            var response = await GetAsync<BaseResponseModel>(SystemConstants.UserService, $"/api/member");
             var result = JsonConvert.DeserializeObject<IEnumerable<UserDto>>(response.XData.ToString());
             return result;
         }
         public async Task<UserDto> UpdateMember(int id, UpdateUserDto userDto)
         {
-            var response = await PutAsync<BaseResponseModel, UpdateUserDto>(SystemConstants.AppSettings.UserServiceAddress, $"/api/member/{id}", userDto);
+            var response = await PutAsync<BaseResponseModel, UpdateUserDto>(SystemConstants.UserService, $"/api/member/{id}", userDto);
             var result = JsonConvert.DeserializeObject<UserDto>(response.XData.ToString());
             return result;
         }

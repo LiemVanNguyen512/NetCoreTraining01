@@ -27,10 +27,19 @@ namespace Course_service.Extensions
             services.AddSwaggerGen();
             services.ConfigureCourseDbContext(configuration);
             services.AddInfrastructureServices();
-            services.AddHttpClient();
+            services.ConfigureHttpClient(configuration);
             services.AddAutoMapper(cfg => cfg.AddProfile(new MappingProfile()));
             return services;
         }        
+        private static IServiceCollection ConfigureHttpClient(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddHttpClient(SystemConstants.UserService, client =>
+            {
+                client.BaseAddress = new Uri(configuration[SystemConstants.AppSettings.UserServiceAddress]);
+            }).UseLinearHttpRetryPolicy(int.Parse(configuration[SystemConstants.AppSettings.RetryCount]),
+                                        int.Parse(configuration[SystemConstants.AppSettings.RetryAttemptSeconds]));
+            return services;
+        }
         private static IServiceCollection ConfigureCourseDbContext(this IServiceCollection services, IConfiguration configuration)
         {
             var connectionString = configuration.GetConnectionString("DefaultConnectionString");

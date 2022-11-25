@@ -9,6 +9,7 @@ namespace Shared.Constants
     public static class SystemConstants
     {
         public const string DefaultConnection = "DefaultConnectionString";
+        public const string UserService = "UserService";
         public class AppSettings
         {
             public const string Token = "Token";

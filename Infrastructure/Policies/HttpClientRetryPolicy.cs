@@ -37,14 +37,13 @@ namespace Infrastructure.Policies
 
         private static IAsyncPolicy<HttpResponseMessage> ConfigureLinearHttpRetry(int retryCount, int retryAttemptSeconds)
         {
-            Log.Information($"Retry {retryCount} times send request");
             return HttpPolicyExtensions
                 .HandleTransientHttpError()
                 .Or<TimeoutRejectedException>()
                 .WaitAndRetryAsync(retryCount, retryAttempt => TimeSpan.FromSeconds(retryAttemptSeconds),
-                    (exception, retryCount, context) =>
+                    (exception, retrySeconds, context) =>
                     {
-                        Log.Error($"Retry {retryCount} of {context.PolicyKey} at " +
+                        Log.Error($"Retry {retryCount} times each {retrySeconds} seconds of {context.PolicyKey} at " +
                               $"{context.OperationKey}, due to: {exception.Exception.Message}");
                     });
         }

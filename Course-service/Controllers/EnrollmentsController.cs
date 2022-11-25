@@ -13,12 +13,10 @@ namespace Course_service.Controllers
     [TypeFilter(typeof(CustomResponseFilter))]
     public class EnrollmentsController : ControllerBase
     {
-        private readonly IUserApiClient _userApiClient;
         private readonly IEnrollmentService _enrollmentService;
 
-        public EnrollmentsController(IUserApiClient userApiClient, IEnrollmentService enrollmentService)
+        public EnrollmentsController(IEnrollmentService enrollmentService)
         {
-            _userApiClient = userApiClient;
             _enrollmentService = enrollmentService;
         }
         [HttpGet]
