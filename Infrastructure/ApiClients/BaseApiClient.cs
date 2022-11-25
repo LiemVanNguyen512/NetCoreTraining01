@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Polly;
 using Polly.Retry;
+using System;
 using System.Net.Http;
 using System.Text;
 using static Shared.Constants.SystemConstants;
@@ -11,100 +12,105 @@ namespace ApiIntegration
 {
     public class BaseApiClient
     {
-        private readonly HttpClient _client;
+        private readonly IHttpClientFactory _httpClientFactory;
         private readonly IConfiguration _configuration;
         private readonly ILogger<BaseApiClient> _logger;
         private readonly AsyncRetryPolicy _retryPolicy;
 
-        public BaseApiClient(HttpClient client, IConfiguration configuration, ILogger<BaseApiClient> logger)
+        public BaseApiClient(IHttpClientFactory httpClientFactory, IConfiguration configuration, ILogger<BaseApiClient> logger)
         {
-            _client = client;
+            _httpClientFactory = httpClientFactory;
             _configuration = configuration;
             _logger = logger;
             _retryPolicy = Policy.Handle<Exception>()
                     .WaitAndRetryAsync(
-                        int.Parse(_configuration[AppSettings.RetryCount])-1, 
-                        retryAttempt => TimeSpan.FromSeconds(int.Parse(_configuration[AppSettings.RetryAttemptSeconds])));
-            _logger.LogInformation($"Retry count: {_configuration[AppSettings.RetryCount]}, Retry Attempt Seconds: {_configuration[AppSettings.RetryAttemptSeconds]}");
+                        int.Parse(_configuration[AppSettings.RetryCount]), 
+                        retryAttempt => TimeSpan.FromSeconds(int.Parse(_configuration[AppSettings.RetryAttemptSeconds])),
+                        (exception, retrySeconds, context) =>
+                        {
+                            _logger.LogError($"Retry {_configuration[AppSettings.RetryCount]} times " +
+                                $"each {retrySeconds} seconds of {context.PolicyKey} " +
+                                $"at {context.OperationKey}, due to {exception.Message}");
+                        });
         }
 
         public async Task<TResponse> GetAsync<TResponse>(string baseAddress, string url)
         {
-            _client.BaseAddress = new Uri(_configuration[baseAddress]);
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration[baseAddress]);
             var response = await _retryPolicy.ExecuteAsync(async () =>
             {
-                _logger.LogInformation($"Retry GET API {_client.BaseAddress}{url}");
-                return await _client.GetAsync(url);
+                return await client.GetAsync(url);
             });
 
             var body = await response.Content.ReadAsStringAsync();
             if (response.IsSuccessStatusCode)
             {
-                _logger.LogInformation($"GET API {_client.BaseAddress}{url} successfully");
+                _logger.LogInformation($"GET API {client.BaseAddress}{url} successfully");
                 TResponse myDeserializedObjList = (TResponse)JsonConvert.DeserializeObject(body,typeof(TResponse));
 
                 return myDeserializedObjList;
             }
 
-            _logger.LogWarning($"Cannot GET API {_client.BaseAddress}{url}");
+            _logger.LogWarning($"Cannot GET API {client.BaseAddress}{url}");
             return JsonConvert.DeserializeObject<TResponse>(body);
         }
         public async Task<TResponse> PostAsync<TResponse, T>(string baseAddress, string url, T request)
         {
-            _client.BaseAddress = new Uri(_configuration[baseAddress]);
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration[baseAddress]);
             var json = JsonConvert.SerializeObject(request);
             var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
 
             var response = await _retryPolicy.ExecuteAsync(async () =>
             {
-                _logger.LogInformation($"Retry POST API {_client.BaseAddress}{url}");
-                return await _client.PostAsync(url, httpContent);
+                return await client.PostAsync(url, httpContent);
             });
 
             var body = await response.Content.ReadAsStringAsync();
             if (response.IsSuccessStatusCode)
             {
-                _logger.LogInformation($"POST API {_client.BaseAddress}{url} successfully");
+                _logger.LogInformation($"POST API {client.BaseAddress}{url} successfully");
                 TResponse myDeserializedObjList = (TResponse)JsonConvert.DeserializeObject(body,typeof(TResponse));
 
                 return myDeserializedObjList;
             }
 
-            _logger.LogWarning($"Cannot POST API {_client.BaseAddress}{url}");
+            _logger.LogWarning($"Cannot POST API {client.BaseAddress}{url}");
             return JsonConvert.DeserializeObject<TResponse>(body);
         }
         public async Task<TResponse> PutAsync<TResponse, T>(string baseAddress, string url, T request)
         {
-            _client.BaseAddress = new Uri(_configuration[baseAddress]);
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration[baseAddress]);
             var json = JsonConvert.SerializeObject(request);
             var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
 
             var response = await _retryPolicy.ExecuteAsync(async () =>
             {
-                _logger.LogInformation($"Retry PUT API {_client.BaseAddress}{url}");
-                return await _client.PutAsync(url, httpContent);
+                return await client.PutAsync(url, httpContent);
             });
 
             var body = await response.Content.ReadAsStringAsync();
             if (response.IsSuccessStatusCode)
             {
-                _logger.LogInformation($"PUT API {_client.BaseAddress}{url} successfully");
+                _logger.LogInformation($"PUT API {client.BaseAddress}{url} successfully");
                 TResponse myDeserializedObjList = (TResponse)JsonConvert.DeserializeObject(body,typeof(TResponse));
 
                 return myDeserializedObjList;
             }
 
-            _logger.LogWarning($"Cannot PUT API {_client.BaseAddress}{url}");
+            _logger.LogWarning($"Cannot PUT API {client.BaseAddress}{url}");
             return JsonConvert.DeserializeObject<TResponse>(body);
         }
         public async Task<bool> Delete(string baseAddress, string url)
         {
-            _client.BaseAddress = new Uri(_configuration[baseAddress]);
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration[baseAddress]);
 
             var response = await _retryPolicy.ExecuteAsync(async () =>
             {
-                _logger.LogInformation($"Retry DELETE API {_client.BaseAddress}{url}");
-                return await _client.DeleteAsync(url);
+                return await client.DeleteAsync(url);
             });
 
             return response.IsSuccessStatusCode;
