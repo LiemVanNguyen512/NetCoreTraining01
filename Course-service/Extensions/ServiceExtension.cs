@@ -36,7 +36,8 @@ namespace Course_service.Extensions
             services.AddHttpClient(SystemConstants.UserService, client =>
             {
                 client.BaseAddress = new Uri(configuration[SystemConstants.AppSettings.UserServiceAddress]);
-            }).UseLinearHttpRetryPolicy(int.Parse(configuration[SystemConstants.AppSettings.RetryCount]),
+            }).AddHttpMessageHandler<LoggingDelegatingHandler>()
+                .UseLinearHttpRetryPolicy(int.Parse(configuration[SystemConstants.AppSettings.RetryCount]),
                                         int.Parse(configuration[SystemConstants.AppSettings.RetryAttemptSeconds]));
             return services;
         }
@@ -62,6 +63,8 @@ namespace Course_service.Extensions
                             .AddScoped(typeof(IEnrollmentRepository), typeof(EnrollmentRepository))
                             .AddTransient(typeof(ICourseService), typeof(CourseService))
                             .AddTransient(typeof(IEnrollmentService), typeof(EnrollmentService))
-                            .AddTransient(typeof(IUserApiClient), typeof(UserApiClient));        }
+                            .AddTransient(typeof(IUserApiClient), typeof(UserApiClient))
+                            .AddTransient<LoggingDelegatingHandler>();       
+        }
     }
 }

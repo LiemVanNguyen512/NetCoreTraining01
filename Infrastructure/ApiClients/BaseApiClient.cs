@@ -31,13 +31,13 @@ namespace ApiIntegration
             var body = await response.Content.ReadAsStringAsync();
             if (response.IsSuccessStatusCode)
             {
-                _logger.LogInformation($"GET API {client.BaseAddress}{url} successfully");
+                //_logger.LogInformation($"GET API {client.BaseAddress}{url} successfully");
                 TResponse myDeserializedObjList = (TResponse)JsonConvert.DeserializeObject(body,typeof(TResponse));
 
                 return myDeserializedObjList;
             }
 
-            _logger.LogWarning($"Cannot GET API {client.BaseAddress}{url}");
+            //_logger.LogWarning($"Cannot GET API {client.BaseAddress}{url}");
             return JsonConvert.DeserializeObject<TResponse>(body);
         }
         public async Task<TResponse> PostAsync<TResponse, T>(string clientName, string url, T request)
@@ -51,13 +51,13 @@ namespace ApiIntegration
             var body = await response.Content.ReadAsStringAsync();
             if (response.IsSuccessStatusCode)
             {
-                _logger.LogInformation($"POST API {client.BaseAddress}{url} successfully");
+                //_logger.LogInformation($"POST API {client.BaseAddress}{url} successfully");
                 TResponse myDeserializedObjList = (TResponse)JsonConvert.DeserializeObject(body,typeof(TResponse));
 
                 return myDeserializedObjList;
             }
 
-            _logger.LogWarning($"Cannot POST API {client.BaseAddress}{url}");
+            //_logger.LogWarning($"Cannot POST API {client.BaseAddress}{url}");
             return JsonConvert.DeserializeObject<TResponse>(body);
         }
         public async Task<TResponse> PutAsync<TResponse, T>(string clientName, string url, T request)
@@ -71,13 +71,13 @@ namespace ApiIntegration
             var body = await response.Content.ReadAsStringAsync();
             if (response.IsSuccessStatusCode)
             {
-                _logger.LogInformation($"PUT API {client.BaseAddress}{url} successfully");
+                //_logger.LogInformation($"PUT API {client.BaseAddress}{url} successfully");
                 TResponse myDeserializedObjList = (TResponse)JsonConvert.DeserializeObject(body,typeof(TResponse));
 
                 return myDeserializedObjList;
             }
 
-            _logger.LogWarning($"Cannot PUT API {client.BaseAddress}{url}");
+            //_logger.LogWarning($"Canknot PUT API {client.BaseAddress}{url}");
             return JsonConvert.DeserializeObject<TResponse>(body);
         }
         public async Task<bool> Delete(string clientName, string url)
