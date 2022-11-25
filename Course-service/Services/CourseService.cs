@@ -15,7 +15,7 @@ namespace Course_service.Services
 
         public CourseService(ICourseRepository repository, IMapper mapper, ILogger<CourseService> logger)
         {
-            _repository = repository;
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _mapper = mapper;
             _logger = logger;
         }

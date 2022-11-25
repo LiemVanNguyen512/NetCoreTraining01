@@ -25,9 +25,9 @@ namespace Course_service.Services
             ILogger<EnrollmentService> logger, 
             IMapper mapper)
         {
-            _repository = repository;
-            _courseService = courseService;
-            _userApiClient = userApiClient;
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _courseService = courseService ?? throw new ArgumentNullException(nameof(courseService));
+            _userApiClient = userApiClient ?? throw new ArgumentNullException(nameof(userApiClient));
             _logger = logger;
             _mapper = mapper;
         }

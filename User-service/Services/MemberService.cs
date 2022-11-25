@@ -17,7 +17,7 @@ namespace User_service.Services
 
         public MemberService(IMemberRepository repository, IMapper mapper, ILogger<MemberService> logger)
         {
-            _repository = repository;
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _mapper = mapper;
             _logger = logger;
         }
