@@ -4,24 +4,15 @@ services:
   #database section 
         
   #Members: mysql
-  memberdb:
-    container_name: memberdb
+  mysqldb:
+    container_name: mysqldb
     environment:
       MYSQL_ROOT_PASSWORD: "Passw0rd!"
     restart: always
     volumes:
       - mysql_data:/var/lib/mysql
     ports:
-      - "3306:3306"
-  coursedb:
-    container_name: coursedb
-    environment:
-      MYSQL_ROOT_PASSWORD: "Passw0rd!"
-    restart: always
-    volumes:
-      - mysql_data:/var/lib/mysql
-    ports:
-      - "3307:3306"  
+      - "3306:3306" 
   #infrastructure section 
   portainer:
     container_name: portainer
@@ -38,9 +29,24 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
-      - "ConnectionStrings:DefaultConnectionString=Server=memberdb;Port=3306;Database=Members;Uid=root;Pwd=Passw0rd!"
+      - "ConnectionStrings:DefaultConnectionString=Server=mysqldb;Port=3306;Database=Members;Uid=root;Pwd=Passw0rd!"
     depends_on: 
-      - memberdb
+      - mysqldb
     ports:
       - "6002:80"
     restart: always
+  course-service:
+    container_name: course-service
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - "ConnectionStrings:DefaultConnectionString=Server=mysqldb;Port=3306;Database=Course;Uid=root;Pwd=Passw0rd!"
+      - "UserServiceAddress=http://172.16.20.229:6002"
+      - "RetryCount=3"
+      - "RetryAttemptSeconds=5"
+    depends_on: 
+      - mysqldb
+    ports:
+      - "6003:80"
+    restart: always
+    #-http://172.16.20.229: Your PC IP Address

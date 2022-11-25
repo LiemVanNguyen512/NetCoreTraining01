@@ -40,9 +40,18 @@ docker rm myapp
 docker network create example-app
 docker run --name dotnetcoretraining -d -p 3306:3306 -e MYSQL_ROOT_PASSWORD=Passw0rd! -v mysql:/var/lib/mysql --network example-app mysql:8.0.29
 ## Application URLs - LOCAL Environment (Docker Container):
-- Contact API:
-+ Get list Contacts (HttpGet): http://localhost:6001/api/contacts
-+ Get Contact by Id (HttpGet): http://localhost:6001/api/contacts/{id}
-+ Create Contact (HttpPost): http://localhost:6001/api/contacts
-+ Update Contact (HttpPut): http://localhost:6001/api/contacts
+### User service:
++ Get list Contacts (HttpGet): http://localhost:6002/api/member
++ Get Contact by Id (HttpGet): http://localhost:6002/api/member/{id}
++ Create Contact (HttpPost): http://localhost:6002/api/member
++ Update Contact (HttpPut): http://localhost:6002/api/member
+
+###Course service:
++ Get list courses (HttpGet): http://localhost:6003/api/courses
++ Get course by Id (HttpGet): http://localhost:6003/api/courses/{id}
++ Create course (HttpPost): http://localhost:6003/api/courses
++ Update course (HttpPut): http://localhost:6003/api/courses/{id}
++ Get list enrollments (HttpGet): http://localhost:6003/api/enrollments
++ Add specific member to specific course (HttpPost): http://localhost:6003/api/enrollments
++ Detach specific member from specific course (HttpPut): http://localhost:6003/api/enrollments/cancel?memberId=&courseId=
 
