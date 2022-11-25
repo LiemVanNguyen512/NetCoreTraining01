@@ -17,7 +17,7 @@ namespace Infrastructure.ApiClients
 {
     public class UserApiClient : BaseApiClient, IUserApiClient
     {
-        public UserApiClient(HttpClient client, IConfiguration configuration, ILogger<BaseApiClient> logger) : base(client, configuration, logger)
+        public UserApiClient(IHttpClientFactory httpClientFactory, IConfiguration configuration, ILogger<BaseApiClient> logger) : base(httpClientFactory, configuration, logger)
         {
         }
 

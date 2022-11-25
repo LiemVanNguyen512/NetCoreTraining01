@@ -21,13 +21,6 @@ namespace Course_service.Controllers
             _userApiClient = userApiClient;
             _enrollmentService = enrollmentService;
         }
-
-        [HttpGet("test/{id}")]
-        public async Task<IActionResult> GetUser(int id)
-        {
-            var result = await _userApiClient.GetMemberById(id);
-            return Ok(result);
-        }
         [HttpGet]
         public async Task<IActionResult> GetListEnrollments()
         {
@@ -41,9 +34,10 @@ namespace Course_service.Controllers
             return Ok(result);
         }
         [HttpPut("cancel")]
-        public Task<IActionResult> UpdateEnrollment([Required] int id)
+        public async Task<IActionResult> CancelEnrollment([Required] int memberId, [Required] int courseId)
         {
-            throw new NotImplementedException();
+            await _enrollmentService.CancelEnrollmentAsync(memberId, courseId);
+            return StatusCode(200, $"Cancelled enrollment with Member {memberId} and Course {courseId}");
         }
     }
 }

@@ -7,6 +7,6 @@ namespace Course_service.Services.Interfaces
     {
         Task<IEnumerable<EnrollmentDto>> GetEnrollmentsAsync();
         Task<EnrollmentDto> CreateEnrollmentAsync(CreateEnrollmentDto enrollmentDto);
-        Task<EnrollmentDto> UpdateEnrollmentAsync(int id, UpdateEnrollmentDto enrollmentDto);
+        Task CancelEnrollmentAsync(int memberId, int courseId);
     }
 }
