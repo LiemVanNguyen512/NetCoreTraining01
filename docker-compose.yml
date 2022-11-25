@@ -2,11 +2,8 @@ version: '3.8'
 
 services:
   #database section
-  memberdb:
+  mysqldb:
     image: mysql:8.0.29
-  coursedb:
-    image: mysql:8.0.29
-
   #infrastructure section
   portainer:
     image: portainer/portainer-ce   
@@ -16,6 +13,11 @@ services:
     build:
         context: .
         dockerfile: User-service/Dockerfile
+  course-service:
+    image: ${DOCKER_REGISTRY-}course-service:${PLATFORM:-linux}-${TAG:-latest}
+    build:
+        context: .
+        dockerfile: Course-service/Dockerfile
 #network section
 networks:
   default:
