@@ -11,7 +11,6 @@ using Infrastructure.Policies;
 using Microsoft.EntityFrameworkCore;
 using MySqlConnector;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
-using ApiIntegration;
 using Shared.Constants;
 using Common.Logging;
 
