@@ -67,7 +67,43 @@ namespace Course_service.Services
                 await _repository.RollbackTransactionAsync();
                 throw new Exception($"Can't create enrollment");
             }
-        }        
+        }
+        public EnrollmentDto CreateEnrollmentSync(CreateEnrollmentDto enrollmentDto)
+        {
+            //check existing member before
+            var user = CheckValidUser(enrollmentDto.UserId).Result;
+
+            //check existing course before
+            var course = CheckValidCourse(enrollmentDto.CourseId).Result;
+
+            //check user "balance" is enough
+            CheckValidBalance(user, course.Price);
+            try
+            {
+                //Begin transaction
+                _repository.BeginTransactionAsync().Wait();
+                //update Member's Balance -= Courses.Price
+                UpdateMemberBalance(user, course.Price, true).Wait();
+
+                //Create new enrollment
+                var enrollment = _mapper.Map<Enrollment>(enrollmentDto);
+                enrollment.EnrolledDate = DateTime.Now;
+                _repository.CreateEnrollmentAsync(enrollment).Wait();
+
+                //Return enrollment already created
+                var result = _mapper.Map<EnrollmentDto>(enrollment);
+                result.Course = _courseService.GetCourseAsync(result.CourseId).Result;
+                result.Member = _userApiClient.GetMemberById(result.UserId).Result;
+                //End transaction
+                _repository.EndTransactionAsync().Wait();
+                return result;
+            }
+            catch
+            {
+                _repository.RollbackTransactionAsync().Wait();
+                throw new Exception($"Can't create enrollment");
+            }
+        }
         public async Task<IEnumerable<EnrollmentDto>> GetEnrollmentsAsync()
         {
             var enrollments = await _repository.GetEnrollmentsAsync();
@@ -84,9 +120,22 @@ namespace Course_service.Services
             });
             return enrollmentDtos;
         }
-
-        
-        
+        public IEnumerable<EnrollmentDto> GetEnrollmentsSync()
+        {
+            var enrollments = _repository.GetEnrollmentsAsync().Result;
+            var enrollmentDtos = _mapper.Map<IEnumerable<EnrollmentDto>>(enrollments);
+            var members = _userApiClient.GetMembersSync();
+            enrollmentDtos = enrollmentDtos.Select(x => new EnrollmentDto()
+            {
+                Id = x.Id,
+                EnrolledDate = x.EnrolledDate,
+                CourseId = x.CourseId,
+                Course = x.Course,
+                UserId = x.UserId,
+                Member = members.FirstOrDefault(m => m.Id == x.UserId)
+            });
+            return enrollmentDtos;
+        }
         public async Task CancelEnrollmentAsync(int memberId, int courseId)
         {
             //check existing member before
@@ -113,7 +162,32 @@ namespace Course_service.Services
                 throw new Exception($"Can't cancel enrollment with member Id {memberId} and course Id {courseId}");
             }        
         }
-
+        public void CancelEnrollmentSync(int memberId, int courseId)
+        {
+            //check existing member before
+            var user = CheckValidUser(memberId).Result;
+            //check existing course before
+            var course = CheckValidCourse(courseId).Result;
+            try
+            {
+                //Begin transaction
+                _repository.BeginTransactionAsync().Wait();
+                //Get enrollment
+                var enrollmentDto = GetEnrollmentToCancel(memberId, courseId).Result;
+                //update Member's Balance += Courses.Price
+                UpdateMemberBalance(user, course.Price, false).Wait();
+                //Remove this enrollment
+                var enrollment = _mapper.Map<Enrollment>(enrollmentDto);
+                _repository.CancelEnrollmentAsync(enrollment).Wait();
+                //End transaction
+                _repository.EndTransactionAsync().Wait();
+            }
+            catch
+            {
+                _repository.RollbackTransactionAsync().Wait();
+                throw new Exception($"Can't cancel enrollment with member Id {memberId} and course Id {courseId}");
+            }
+        }
         private async Task UpdateMemberBalance(UserDto user, float coursePrice, bool isRegistered)
         {
             if (isRegistered)
@@ -163,8 +237,6 @@ namespace Course_service.Services
             }
             var result = _mapper.Map<EnrollmentDto>(enrollment);
             return result;
-        }
-
-
+        }       
     }
 }

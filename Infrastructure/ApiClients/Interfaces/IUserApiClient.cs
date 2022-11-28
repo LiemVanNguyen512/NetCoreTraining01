@@ -12,6 +12,7 @@ namespace Infrastructure.ApiClients.Interfaces
     {
         Task<UserDto> GetMemberById(int id);
         Task<IEnumerable<UserDto>> GetMembers();
+        IEnumerable<UserDto> GetMembersSync();
         Task<UserDto> UpdateMember(int id, UpdateUserDto userDto);
     }
 }

@@ -55,3 +55,7 @@ docker run --name dotnetcoretraining -d -p 3306:3306 -e MYSQL_ROOT_PASSWORD=Pass
 + Add specific member to specific course (HttpPost): http://localhost:6003/api/enrollments
 + Detach specific member from specific course (HttpPut): http://localhost:6003/api/enrollments/cancel?memberId=&courseId=
 
+### Useful command:
+
+dotnet tool install --global dotnet-ef --version 6.*
+

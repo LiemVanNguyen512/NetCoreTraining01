@@ -25,6 +25,12 @@ namespace Course_service.Controllers
             var result = await _enrollmentService.GetEnrollmentsAsync();
             return Ok(result);
         }
+        [HttpGet("sync")]
+        public IActionResult GetListEnrollmentsSync()
+        {
+            var result = _enrollmentService.GetEnrollmentsSync();
+            return Ok(result);
+        }
         [HttpPost]
         public async Task<IActionResult> CreateEnrollment([FromBody]CreateEnrollmentDto enrollmentDto)
         {
@@ -35,6 +41,18 @@ namespace Course_service.Controllers
         public async Task<IActionResult> CancelEnrollment([Required] int memberId, [Required] int courseId)
         {
             await _enrollmentService.CancelEnrollmentAsync(memberId, courseId);
+            return StatusCode(200, $"Cancelled enrollment with Member {memberId} and Course {courseId}");
+        }
+        [HttpPost("sync")]
+        public IActionResult CreateEnrollmentSync([FromBody] CreateEnrollmentDto enrollmentDto)
+        {
+            var result = _enrollmentService.CreateEnrollmentSync(enrollmentDto);
+            return Ok(result);
+        }
+        [HttpPut("cancel/sync")]
+        public IActionResult CancelEnrollmentSync([Required] int memberId, [Required] int courseId)
+        {
+            _enrollmentService.CancelEnrollmentSync(memberId, courseId);
             return StatusCode(200, $"Cancelled enrollment with Member {memberId} and Course {courseId}");
         }
     }

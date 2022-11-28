@@ -34,9 +34,21 @@ namespace Infrastructure.ApiClients
             var result = JsonConvert.DeserializeObject<IEnumerable<UserDto>>(response.XData.ToString());
             return result;
         }
+        public IEnumerable<UserDto> GetMembersSync()
+        {
+            var response = GetSync<BaseResponseModel>(SystemConstants.UserService, $"/api/member");
+            var result = JsonConvert.DeserializeObject<IEnumerable<UserDto>>(response.XData.ToString());
+            return result;
+        }
         public async Task<UserDto> UpdateMember(int id, UpdateUserDto userDto)
         {
             var response = await PutAsync<BaseResponseModel, UpdateUserDto>(SystemConstants.UserService, $"/api/member/{id}", userDto);
+            var result = JsonConvert.DeserializeObject<UserDto>(response.XData.ToString());
+            return result;
+        }
+        public UserDto UpdateMemberSync(int id, UpdateUserDto userDto)
+        {
+            var response = PutSync<BaseResponseModel, UpdateUserDto>(SystemConstants.UserService, $"/api/member/{id}", userDto);
             var result = JsonConvert.DeserializeObject<UserDto>(response.XData.ToString());
             return result;
         }
