@@ -6,8 +6,6 @@ using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using MySqlConnector;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
-using User_service.Repositories.Interfaces;
-using User_service.Repositories;
 
 namespace User_service.Extensions
 {
@@ -42,7 +40,6 @@ namespace User_service.Extensions
         {
             return services.AddScoped(typeof(IRepositoryBase<,,>), typeof(RepositoryBase<,,>))
                             .AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>))
-                            .AddScoped<IMemberRepository, MemberRepository>()
                             .AddTransient<IMemberService, MemberService>();
         }
 
