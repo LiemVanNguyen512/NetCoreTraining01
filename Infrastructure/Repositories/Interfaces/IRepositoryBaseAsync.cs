@@ -20,14 +20,14 @@ namespace Infrastructure.Repositories.Interfaces
         IQueryable<T> FindByCondition(Expression<Func<T, bool>> expression, bool trackChanges = false,
             params Expression<Func<T, object>>[] includeProperties);
 
-        Task<T?> GetByIdAsync(K id);
-        Task<T?> GetByIdAsync(K id, params Expression<Func<T, object>>[] includeProperties);
-        void Create(T entity);
-        Task<K> CreateAsync(T entity);
+        Task<T?> FindAsync(K id);
+        Task<T?> FindAsync(K id, params Expression<Func<T, object>>[] includeProperties);
+        void Add(T entity);
+        Task<K> AddAsync(T entity);
         void Update(T entity);
         Task UpdateAsync(T entity);
-        void Delete(T entity);
-        Task DeleteAsync(T entity);
+        void Remove(T entity);
+        Task RemoveAsync(T entity);
         Task<int> SaveChangesAsync();
         Task<IDbContextTransaction> BeginTransactionAsync();
         Task EndTransactionAsync();

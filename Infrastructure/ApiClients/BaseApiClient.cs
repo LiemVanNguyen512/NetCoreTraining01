@@ -28,7 +28,7 @@ namespace ApiIntegration
             var client = _httpClientFactory.CreateClient(clientName);
             var response = await client.GetAsync(url);
             //------Test Task.Delay
-            await Task.Delay(5000);
+            //await Task.Delay(5000);
             //------Test Task.Delay
             var body = await response.Content.ReadAsStringAsync();
             if (response.IsSuccessStatusCode)
@@ -48,7 +48,7 @@ namespace ApiIntegration
             var client = _httpClientFactory.CreateClient(clientName);
             var response = client.GetAsync(url).Result;
             //-------Test Thread.Sleep
-            Thread.Sleep(5000);
+            //Thread.Sleep(5000);
             //-------Test Thread.Sleep
             var body = response.Content.ReadAsStringAsync().Result;
             if (response.IsSuccessStatusCode)

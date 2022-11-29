@@ -47,11 +47,11 @@ namespace Infrastructure.Repositories
             return items;
         }
 
-        public async Task<T?> GetByIdAsync(K id) =>
+        public async Task<T?> FindAsync(K id) =>
             await FindByCondition(x => x.Id.Equals(id))
                 .FirstOrDefaultAsync();
 
-        public async Task<T?> GetByIdAsync(K id, params Expression<Func<T, object>>[] includeProperties) =>
+        public async Task<T?> FindAsync(K id, params Expression<Func<T, object>>[] includeProperties) =>
             await FindByCondition(x => x.Id.Equals(id), trackChanges: false, includeProperties)
                 .FirstOrDefaultAsync();
         public Task<IDbContextTransaction> BeginTransactionAsync() => _dbContext.Database.BeginTransactionAsync();
@@ -64,9 +64,9 @@ namespace Infrastructure.Repositories
 
         public Task RollbackTransactionAsync() => _dbContext.Database.RollbackTransactionAsync();
 
-        public void Create(T entity) => _dbContext.Set<T>().Add(entity);
+        public void Add(T entity) => _dbContext.Set<T>().Add(entity);
 
-        public async Task<K> CreateAsync(T entity)
+        public async Task<K> AddAsync(T entity)
         {
             await _dbContext.Set<T>().AddAsync(entity);
             await SaveChangesAsync();
@@ -90,9 +90,9 @@ namespace Infrastructure.Repositories
             await SaveChangesAsync();
         }      
 
-        public void Delete(T entity) => _dbContext.Set<T>().Remove(entity);
+        public void Remove(T entity) => _dbContext.Set<T>().Remove(entity);
 
-        public async Task DeleteAsync(T entity)
+        public async Task RemoveAsync(T entity)
         {
             _dbContext.Set<T>().Remove(entity);
             await SaveChangesAsync();

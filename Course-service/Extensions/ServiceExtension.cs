@@ -1,6 +1,4 @@
 ﻿using Course_service.Persistence;
-using Course_service.Repositories;
-using Course_service.Repositories.Interfaces;
 using Course_service.Services;
 using Course_service.Services.Interfaces;
 using Infrastructure.ApiClients;
@@ -57,9 +55,7 @@ namespace Course_service.Extensions
         private static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
         {
             return services.AddScoped(typeof(IRepositoryBase<,,>), typeof(RepositoryBase<,,>))
-                            .AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>))
-                            .AddScoped(typeof(ICourseRepository), typeof(CourseRepository))
-                            .AddScoped(typeof(IEnrollmentRepository), typeof(EnrollmentRepository))
+                            .AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>))                          
                             .AddTransient(typeof(ICourseService), typeof(CourseService))
                             .AddTransient(typeof(IEnrollmentService), typeof(EnrollmentService))
                             .AddTransient(typeof(IUserApiClient), typeof(UserApiClient))

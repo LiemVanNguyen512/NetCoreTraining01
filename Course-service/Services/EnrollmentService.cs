@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using AutoMapper.Execution;
 using Course_service.Entities;
-using Course_service.Repositories.Interfaces;
+using Course_service.Persistence;
 using Course_service.Services.Interfaces;
 using Infrastructure.ApiClients.Interfaces;
+using Infrastructure.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using Shared.DTOs.CourseDTOs;
 using Shared.DTOs.EnrollmentDTOs;
 using Shared.DTOs.UserDTOs;
@@ -12,20 +14,19 @@ namespace Course_service.Services
 {
     public class EnrollmentService : IEnrollmentService
     {
-        private readonly IEnrollmentRepository _repository;
+        private readonly IRepositoryBase<Enrollment, int, CourseContext> _enrollmentRepo;
         private readonly ICourseService _courseService;
         private readonly IUserApiClient _userApiClient;
         private readonly ILogger<EnrollmentService> _logger;
         private readonly IMapper _mapper;
 
         public EnrollmentService(
-            IEnrollmentRepository repository, 
+            IRepositoryBase<Enrollment, int, CourseContext> enrollmentRepo, 
             ICourseService courseService, 
             IUserApiClient userApiClient, 
-            ILogger<EnrollmentService> logger, 
-            IMapper mapper)
+            ILogger<EnrollmentService> logger, IMapper mapper)
         {
-            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _enrollmentRepo = enrollmentRepo ?? throw new ArgumentNullException(nameof(enrollmentRepo));
             _courseService = courseService ?? throw new ArgumentNullException(nameof(courseService));
             _userApiClient = userApiClient ?? throw new ArgumentNullException(nameof(userApiClient));
             _logger = logger;
@@ -45,26 +46,26 @@ namespace Course_service.Services
             try
             {
                 //Begin transaction
-                await _repository.BeginTransactionAsync();
+                await _enrollmentRepo.BeginTransactionAsync();
                 //update Member's Balance -= Courses.Price
                 await UpdateMemberBalance(user, course.Price, true);
 
                 //Create new enrollment
                 var enrollment = _mapper.Map<Enrollment>(enrollmentDto);
                 enrollment.EnrolledDate = DateTime.Now;
-                await _repository.CreateEnrollmentAsync(enrollment);
+                await _enrollmentRepo.AddAsync(enrollment);
 
                 //Return enrollment already created
                 var result = _mapper.Map<EnrollmentDto>(enrollment);
                 result.Course = await _courseService.GetCourseAsync(result.CourseId);
                 result.Member = await _userApiClient.GetMemberById(result.UserId);
                 //End transaction
-                await _repository.EndTransactionAsync();
+                await _enrollmentRepo.EndTransactionAsync();
                 return result;
             }
             catch
             {
-                await _repository.RollbackTransactionAsync();
+                await _enrollmentRepo.RollbackTransactionAsync();
                 throw new Exception($"Can't create enrollment");
             }
         }
@@ -81,32 +82,32 @@ namespace Course_service.Services
             try
             {
                 //Begin transaction
-                _repository.BeginTransactionAsync().Wait();
+                _enrollmentRepo.BeginTransactionAsync().Wait();
                 //update Member's Balance -= Courses.Price
                 UpdateMemberBalance(user, course.Price, true).Wait();
 
                 //Create new enrollment
                 var enrollment = _mapper.Map<Enrollment>(enrollmentDto);
                 enrollment.EnrolledDate = DateTime.Now;
-                _repository.CreateEnrollmentAsync(enrollment).Wait();
+                _enrollmentRepo.AddAsync(enrollment).Wait();
 
                 //Return enrollment already created
                 var result = _mapper.Map<EnrollmentDto>(enrollment);
                 result.Course = _courseService.GetCourseAsync(result.CourseId).Result;
                 result.Member = _userApiClient.GetMemberById(result.UserId).Result;
                 //End transaction
-                _repository.EndTransactionAsync().Wait();
+                _enrollmentRepo.EndTransactionAsync().Wait();
                 return result;
             }
             catch
             {
-                _repository.RollbackTransactionAsync().Wait();
+                _enrollmentRepo.RollbackTransactionAsync().Wait();
                 throw new Exception($"Can't create enrollment");
             }
         }
         public async Task<IEnumerable<EnrollmentDto>> GetEnrollmentsAsync()
         {
-            var enrollments = await _repository.GetEnrollmentsAsync();
+            var enrollments = await _enrollmentRepo.FindAll(false, x => x.Course).ToListAsync();
             var enrollmentDtos = _mapper.Map<IEnumerable<EnrollmentDto>>(enrollments);
             var members = await _userApiClient.GetMembers();
             enrollmentDtos = enrollmentDtos.Select(x => new EnrollmentDto()
@@ -122,7 +123,7 @@ namespace Course_service.Services
         }
         public IEnumerable<EnrollmentDto> GetEnrollmentsSync()
         {
-            var enrollments = _repository.GetEnrollmentsAsync().Result;
+            var enrollments = _enrollmentRepo.FindAll(false,x=>x.Course).ToListAsync().Result;
             var enrollmentDtos = _mapper.Map<IEnumerable<EnrollmentDto>>(enrollments);
             var members = _userApiClient.GetMembersSync();
             enrollmentDtos = enrollmentDtos.Select(x => new EnrollmentDto()
@@ -145,20 +146,20 @@ namespace Course_service.Services
             try
             {
                 //Begin transaction
-                await _repository.BeginTransactionAsync();
+                await _enrollmentRepo.BeginTransactionAsync();
                 //Get enrollment
                 var enrollmentDto = await GetEnrollmentToCancel(memberId, courseId);
                 //update Member's Balance += Courses.Price
                 await UpdateMemberBalance(user, course.Price, false);
                 //Remove this enrollment
                 var enrollment = _mapper.Map<Enrollment>(enrollmentDto);
-                await _repository.CancelEnrollmentAsync(enrollment);
+                await _enrollmentRepo.RemoveAsync(enrollment);
                 //End transaction
-                await _repository.EndTransactionAsync();
+                await _enrollmentRepo.EndTransactionAsync();
             }
             catch
             {
-                await _repository.RollbackTransactionAsync();
+                await _enrollmentRepo.RollbackTransactionAsync();
                 throw new Exception($"Can't cancel enrollment with member Id {memberId} and course Id {courseId}");
             }        
         }
@@ -171,20 +172,20 @@ namespace Course_service.Services
             try
             {
                 //Begin transaction
-                _repository.BeginTransactionAsync().Wait();
+                _enrollmentRepo.BeginTransactionAsync().Wait();
                 //Get enrollment
                 var enrollmentDto = GetEnrollmentToCancel(memberId, courseId).Result;
                 //update Member's Balance += Courses.Price
                 UpdateMemberBalance(user, course.Price, false).Wait();
                 //Remove this enrollment
                 var enrollment = _mapper.Map<Enrollment>(enrollmentDto);
-                _repository.CancelEnrollmentAsync(enrollment).Wait();
+                _enrollmentRepo.RemoveAsync(enrollment).Wait();
                 //End transaction
-                _repository.EndTransactionAsync().Wait();
+                _enrollmentRepo.EndTransactionAsync().Wait();
             }
             catch
             {
-                _repository.RollbackTransactionAsync().Wait();
+                _enrollmentRepo.RollbackTransactionAsync().Wait();
                 throw new Exception($"Can't cancel enrollment with member Id {memberId} and course Id {courseId}");
             }
         }
@@ -230,7 +231,7 @@ namespace Course_service.Services
         }
         private async Task<EnrollmentDto> GetEnrollmentToCancel(int memberId, int courseId)
         {
-            var enrollment = await _repository.GetEnrollmentByMemberAsync(memberId, courseId);
+            var enrollment = await _enrollmentRepo.FindByCondition(x => x.UserId.Equals(memberId) && x.CourseId.Equals(courseId)).SingleOrDefaultAsync();
             if (enrollment == null)
             {
                 throw new Exception($"Can't find any enrollment with member Id {memberId} and course Id {courseId}");
