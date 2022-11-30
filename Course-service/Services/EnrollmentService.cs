@@ -3,8 +3,10 @@ using AutoMapper.Execution;
 using Course_service.Entities;
 using Course_service.Persistence;
 using Course_service.Services.Interfaces;
+using EvenBus.Message.IntegrationEvents.Events;
 using Infrastructure.ApiClients.Interfaces;
 using Infrastructure.Repositories.Interfaces;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Shared.DTOs.CourseDTOs;
 using Shared.DTOs.EnrollmentDTOs;
@@ -19,18 +21,21 @@ namespace Course_service.Services
         private readonly IUserApiClient _userApiClient;
         private readonly ILogger<EnrollmentService> _logger;
         private readonly IMapper _mapper;
+        private readonly IPublishEndpoint _publishEndpoint;
 
         public EnrollmentService(
             IRepositoryBase<Enrollment, int, CourseContext> enrollmentRepo, 
             ICourseService courseService, 
             IUserApiClient userApiClient, 
-            ILogger<EnrollmentService> logger, IMapper mapper)
+            ILogger<EnrollmentService> logger, IMapper mapper,
+            IPublishEndpoint publishEndpoint)
         {
             _enrollmentRepo = enrollmentRepo ?? throw new ArgumentNullException(nameof(enrollmentRepo));
             _courseService = courseService ?? throw new ArgumentNullException(nameof(courseService));
             _userApiClient = userApiClient ?? throw new ArgumentNullException(nameof(userApiClient));
             _logger = logger;
             _mapper = mapper;
+            _publishEndpoint= publishEndpoint;
         }
 
         public async Task<EnrollmentDto> CreateEnrollmentAsync(CreateEnrollmentDto enrollmentDto)
@@ -201,8 +206,9 @@ namespace Course_service.Services
                 //Member cancelled register to course
                 user.BalanceAccount += coursePrice;
             }
-            var updateUser = _mapper.Map<UpdateUserDto>(user);
-            await _userApiClient.UpdateMember(user.Id, updateUser);
+            var eventMessage = _mapper.Map<EnrolledEvent>(user);
+            //publish enrolled event to EventBus Message
+            await _publishEndpoint.Publish(eventMessage);
         }
         private async Task<UserDto> CheckValidUser(int id)
         {

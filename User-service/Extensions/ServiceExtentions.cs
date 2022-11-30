@@ -6,6 +6,11 @@ using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using MySqlConnector;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
+using Infrastructure.Extensions;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Shared.Configurations;
+using MassTransit;
+using User_service.IntergrationEvents.EventsHandler;
 
 namespace User_service.Extensions
 {
@@ -13,8 +18,10 @@ namespace User_service.Extensions
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddConfigurationSettings(configuration);
             services.AddControllers();
             services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
+            services.ConfigureMassTransit();
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
             services.ConfigureMemberDbContext(configuration);
@@ -42,6 +49,33 @@ namespace User_service.Extensions
                             .AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>))
                             .AddTransient<IMemberService, MemberService>();
         }
+        private static IServiceCollection AddConfigurationSettings(this IServiceCollection services,
+        IConfiguration configuration)
+        {
+            var eventBusSettings = configuration.GetSection(nameof(EventBusSettings))
+                .Get<EventBusSettings>();
+            services.AddSingleton(eventBusSettings);
 
+            return services;
+        }
+
+        private static void ConfigureMassTransit(this IServiceCollection services)
+        {
+            var settings = services.GetOptions<EventBusSettings>(nameof(EventBusSettings));
+            if (settings == null || string.IsNullOrEmpty(settings.HostAddress))
+                throw new ArgumentNullException("EventBusSetting is not configured");
+
+            var mqConnection = new Uri(settings.HostAddress);
+            services.TryAddSingleton(KebabCaseEndpointNameFormatter.Instance);
+            services.AddMassTransit(config =>
+            {
+                config.AddConsumersFromNamespaceContaining<EnrolledConsumer>();
+                config.UsingRabbitMq((ctx, cfg) =>
+                {
+                    cfg.Host(mqConnection); 
+                    cfg.ConfigureEndpoints(ctx);
+                });
+            });
+        }
     }
 }

@@ -11,6 +11,13 @@ using MySqlConnector;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using Shared.Constants;
 using Common.Logging;
+using Infrastructure.Extensions;
+using Shared.Configurations;
+using MassTransit.Caching;
+using System.Runtime;
+using MassTransit;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using EvenBus.Message.IntegrationEvents.Interfaces;
 
 namespace Course_service.Extensions
 {
@@ -18,8 +25,11 @@ namespace Course_service.Extensions
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddConfigurationSettings(configuration);
             services.AddControllers();
             services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
+            // configure Mass Transit
+            services.ConfigureMassTransit();
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
             services.ConfigureCourseDbContext(configuration);
@@ -60,6 +70,35 @@ namespace Course_service.Extensions
                             .AddTransient(typeof(IEnrollmentService), typeof(EnrollmentService))
                             .AddTransient(typeof(IUserApiClient), typeof(UserApiClient))
                             .AddTransient<LoggingDelegatingHandler>();       
+        }
+        private static IServiceCollection AddConfigurationSettings(this IServiceCollection services,
+        IConfiguration configuration)
+        {
+            var eventBusSettings = configuration.GetSection(nameof(EventBusSettings))
+                .Get<EventBusSettings>();
+            services.AddSingleton(eventBusSettings);          
+
+            return services;
+        }
+        private static void ConfigureMassTransit(this IServiceCollection services)
+        {
+            var settings = services.GetOptions<EventBusSettings>(nameof(EventBusSettings));
+            if (settings == null || string.IsNullOrEmpty(settings.HostAddress)) 
+                throw new ArgumentNullException("EventBusSettings is not configured!");
+            //Host to connect RabbitMQ
+            var mqConnection = new Uri(settings.HostAddress);
+
+            //KebabCase: UpdateMemberBalance ==> update-member-balance
+            services.TryAddSingleton(KebabCaseEndpointNameFormatter.Instance);
+            services.AddMassTransit(config =>
+            {
+                config.UsingRabbitMq((ctx, cfg) =>
+                {
+                    cfg.Host(mqConnection);
+                });
+                // Publish submit message, instead of sending it to a specific queue directly.
+                config.AddRequestClient<IEnrolledEvent>();
+            });
         }
     }
 }

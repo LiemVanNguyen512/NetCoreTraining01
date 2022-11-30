@@ -7,6 +7,8 @@ services:
   #infrastructure section
   portainer:
     image: portainer/portainer-ce   
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
   #microservices api section
   user-service:
     image: ${DOCKER_REGISTRY-}user-service:${PLATFORM:-linux}-${TAG:-latest}
