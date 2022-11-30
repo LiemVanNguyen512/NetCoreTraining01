@@ -23,6 +23,12 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
+  rabbitmq:
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
   #microservices api section
   user-service:
     container_name: user-service
@@ -30,8 +36,10 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
       - "ConnectionStrings:DefaultConnectionString=Server=mysqldb;Port=3306;Database=Members;Uid=root;Pwd=Passw0rd!"
+      - "EventBusSettings:HostAddress=amqp://guest:guest@rabbitmq:5672"
     depends_on: 
       - mysqldb
+      - rabbitmq
     ports:
       - "6002:80"
     restart: always
@@ -41,11 +49,13 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
       - "ConnectionStrings:DefaultConnectionString=Server=mysqldb;Port=3306;Database=Course;Uid=root;Pwd=Passw0rd!"
+      - "EventBusSettings:HostAddress=amqp://guest:guest@rabbitmq:5672"
       - "UserServiceAddress=http://172.16.20.229:6002"
       - "RetryCount=3"
       - "RetryAttemptSeconds=5"
     depends_on: 
       - mysqldb
+      - rabbitmq
     ports:
       - "6003:80"
     restart: always
