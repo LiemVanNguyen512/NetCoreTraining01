@@ -33,7 +33,7 @@ namespace Infrastructure.Extensions
                     xRequestID = Guid.NewGuid().ToString().Replace("-", "");
                     context.Request.Headers["X-Request-ID"] = xRequestID;
                 }
-                _logger.LogInformation(xRequestID);
+                //_logger.LogInformation(xRequestID);
                 await _next(context);
             }
             catch(Exception ex)

@@ -11,6 +11,8 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Shared.Configurations;
 using MassTransit;
 using User_service.IntergrationEvents.EventsHandler;
+using Infrastructure.ScheduledJobs.Interfaces;
+using Infrastructure.ScheduledJobs;
 
 namespace User_service.Extensions
 {
@@ -24,6 +26,7 @@ namespace User_service.Extensions
             services.ConfigureMassTransit();
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
+            services.AddConfigHangfireSerivce();
             services.ConfigureMemberDbContext(configuration);
             services.AddInfrastructureServices();
             services.AddAutoMapper(cfg => cfg.AddProfile(new MappingProfile()));
@@ -47,7 +50,20 @@ namespace User_service.Extensions
         {
             return services.AddScoped(typeof(IRepositoryBase<,,>), typeof(RepositoryBase<,,>))
                             .AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>))
-                            .AddTransient<IMemberService, MemberService>();
+                            .AddTransient<IMemberService, MemberService>()
+                            .AddTransient<IScheduledJobService, HangfireService>();
+        }
+        private static IServiceCollection AddConfigurationSettings(this IServiceCollection services,
+        IConfiguration configuration)
+        {
+            var eventBusSettings = configuration.GetSection(nameof(EventBusSettings))
+                .Get<EventBusSettings>();
+            services.AddSingleton(eventBusSettings);
+            var hangFireSettings = configuration.GetSection(nameof(HangfireSettings))
+                .Get<HangfireSettings>();
+            services.AddSingleton(hangFireSettings);
+
+            return services;
         }
         private static IServiceCollection AddConfigurationSettings(this IServiceCollection services,
         IConfiguration configuration)
@@ -69,7 +85,7 @@ namespace User_service.Extensions
             services.TryAddSingleton(KebabCaseEndpointNameFormatter.Instance);
             services.AddMassTransit(config =>
             {
-                config.AddConsumersFromNamespaceContaining<EnrolledConsumer>();
+                config.AddConsumersFromNamespaceContaining<EnrolledEventConsumer>();
                 config.UsingRabbitMq((ctx, cfg) =>
                 {
                     cfg.Host(mqConnection); 

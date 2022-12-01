@@ -21,7 +21,7 @@ app.UseRouting();
 //app.UseHttpsRedirection();
 app.UseMiddleware<ExceptionHandler>();
 //app.UseAuthorization();
-
+app.UseHangfireDashboard(builder.Configuration);
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapDefaultControllerRoute();
