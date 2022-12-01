@@ -64,17 +64,7 @@ namespace User_service.Extensions
             services.AddSingleton(hangFireSettings);
 
             return services;
-        }
-        private static IServiceCollection AddConfigurationSettings(this IServiceCollection services,
-        IConfiguration configuration)
-        {
-            var eventBusSettings = configuration.GetSection(nameof(EventBusSettings))
-                .Get<EventBusSettings>();
-            services.AddSingleton(eventBusSettings);
-
-            return services;
-        }
-
+        }       
         private static void ConfigureMassTransit(this IServiceCollection services)
         {
             var settings = services.GetOptions<EventBusSettings>(nameof(EventBusSettings));
